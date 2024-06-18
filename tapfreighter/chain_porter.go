@@ -707,24 +707,6 @@ func (p *ChainPorter) transferReceiverProof(pkg *sendPackage) error {
 		return nil
 	}
 
-	// If we have a non-interactive proof, then we'll launch several
-	// goroutines to deliver the proof(s) to the receiver(s). Since a
-	// pre-signed parcel (a parcel that uses the RPC driven vPSBT flow)
-	// doesn't have proof courier URLs (they aren't part of the vPSBT), the
-	// proofs must always be delivered in an interactive manner from sender
-	// to receiver, and we don't even need to attempt to use a proof
-	// courier.
-	_, isPreSigned := pkg.Parcel.(*PreSignedParcel)
-	if !isPreSigned {
-		ctx, cancel := p.WithCtxQuitNoTimeout()
-		defer cancel()
-
-		err := fn.ParSlice(ctx, pkg.OutboundPkg.Outputs, deliver)
-		if err != nil {
-			return fmt.Errorf("error delivering proof(s): %w", err)
-		}
-	}
-
 	log.Infof("Marking parcel (txid=%v) as confirmed!",
 		pkg.OutboundPkg.AnchorTx.TxHash())
 
@@ -767,6 +749,24 @@ func (p *ChainPorter) transferReceiverProof(pkg *sendPackage) error {
 	if err != nil {
 		return fmt.Errorf("unable to log parcel delivery "+
 			"confirmation: %w", err)
+	}
+
+	// If we have a non-interactive proof, then we'll launch several
+	// goroutines to deliver the proof(s) to the receiver(s). Since a
+	// pre-signed parcel (a parcel that uses the RPC driven vPSBT flow)
+	// doesn't have proof courier URLs (they aren't part of the vPSBT), the
+	// proofs must always be delivered in an interactive manner from sender
+	// to receiver, and we don't even need to attempt to use a proof
+	// courier.
+	_, isPreSigned := pkg.Parcel.(*PreSignedParcel)
+	if !isPreSigned {
+		ctx, cancel := p.WithCtxQuitNoTimeout()
+		defer cancel()
+
+		err := fn.ParSlice(ctx, pkg.OutboundPkg.Outputs, deliver)
+		if err != nil {
+			return fmt.Errorf("error delivering proof(s): %w", err)
+		}
 	}
 
 	pkg.SendState = SendStateComplete
