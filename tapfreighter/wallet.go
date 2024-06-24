@@ -1368,7 +1368,7 @@ func (f *AssetWallet) AnchorVirtualTransactions(ctx context.Context,
 
 	// Construct our template PSBT to commits to the set of dummy locators
 	// we use to make fee estimation work.
-	sendPacket, err := tapscript.CreateAnchorTx(vPacket.Outputs)
+	sendPacket, err := tapscript.CreateAnchorTx(vPacket.Outputs, params.FeeRate)
 	if err != nil {
 		return nil, fmt.Errorf("error creating anchor TX: %w", err)
 	}

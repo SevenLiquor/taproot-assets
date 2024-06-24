@@ -26,6 +26,7 @@ import (
 	"github.com/lightninglabs/taproot-assets/tapscript"
 	"github.com/lightninglabs/taproot-assets/vm"
 	"github.com/lightningnetwork/lnd/keychain"
+	"github.com/lightningnetwork/lnd/lnwallet/chainfee"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,6 +41,7 @@ var (
 	)
 
 	receiverExternalIdx uint32 = 2
+	feeRate             chainfee.SatPerKWeight
 )
 
 // spendData represents the collection of structs needed to begin a spend.
@@ -1339,7 +1341,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		outputCommitments[0] = nil
@@ -1375,7 +1377,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		outputCommitments[1] = nil
@@ -1411,7 +1413,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		_, err = tapscript.UpdateTaprootOutputKeys(
@@ -1450,7 +1452,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		_, err = tapscript.UpdateTaprootOutputKeys(
@@ -1489,7 +1491,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		_, err = tapscript.UpdateTaprootOutputKeys(
@@ -1529,7 +1531,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		_, err = tapscript.UpdateTaprootOutputKeys(
@@ -1570,7 +1572,7 @@ var updateTaprootOutputKeysTestCases = []testCase{{
 		)
 		require.NoError(t, err)
 
-		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+		btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 		require.NoError(t, err)
 
 		_, err = tapscript.UpdateTaprootOutputKeys(
@@ -1623,7 +1625,7 @@ func createSpend(t *testing.T, state *spendData, inputSet commitment.InputSet,
 	)
 	require.NoError(t, err)
 
-	btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs)
+	btcPkt, err := tapscript.CreateAnchorTx(pkt.Outputs, feeRate)
 	require.NoError(t, err)
 
 	_, err = tapscript.UpdateTaprootOutputKeys(

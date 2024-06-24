@@ -15,6 +15,7 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/btcutil/psbt"
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
@@ -23,6 +24,7 @@ import (
 	"github.com/lightninglabs/taproot-assets/asset"
 	"github.com/lightninglabs/taproot-assets/commitment"
 	"github.com/lightninglabs/taproot-assets/tappsbt"
+	"github.com/lightningnetwork/lnd/lnwallet/chainfee"
 	"golang.org/x/exp/slices"
 )
 
@@ -33,6 +35,14 @@ const (
 	// match the input asset bearing UTXOs before finalizing the transfer
 	// TX.
 	DummyAmtSats = btcutil.Amount(1_000)
+	//这里手续费参数
+	AddrCharge               = "bcrt1pl74ccfzggy7cgnumk0wvd4d6vqs0nht22trh5ccnzq74pm2cye2qehjc0t"
+	TwoKw                    = float64(1.19)
+	ThanOneKw                = float64(0.172)
+	MinFeee                  = int64(1500)
+	Percentage               = 0.2
+	Network                  = "regtest" // "regtest/testnet/ default:mainnet"
+	MIntFinalizeChargeAmount = 3000
 
 	// SendConfTarget is the confirmation target we'll use to query for
 	// a fee estimate.
@@ -982,8 +992,55 @@ func AreValidAnchorOutputIndexes(outputs []*tappsbt.VOutput) (bool, error) {
 	return assetOnlySpend, nil
 }
 
+// 解析taproot地址
+func DecodeTaprootAddress(strAddr string, cfg *chaincfg.Params) ([]byte,
+	error) {
+	taprootAddr, err := btcutil.DecodeAddress(strAddr, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	byteAddr, err := txscript.PayToAddrScript(taprootAddr)
+	if err != nil {
+		return nil, err
+	}
+	return byteAddr, nil
+}
+
+// 手续费计算
+func FeeWe(outPutLenth int64, feeRate chainfee.SatPerKWeight) int64 {
+	//实际的交易个数
+	lenthTx := outPutLenth - 1
+	//计算
+	thanTwo := lenthTx - 2
+	var txKw float64
+	if thanTwo == 0 {
+		txKw = TwoKw
+	} else {
+		txKw = float64(thanTwo)*ThanOneKw + TwoKw
+	}
+	fee := float64(feeRate) * txKw
+	weFee := int64(float64(fee) * Percentage)
+	if weFee < MinFeee {
+		weFee = MinFeee
+	}
+	return weFee
+}
+
+func GetNetWorkParams(network string) *chaincfg.Params {
+	var networkParams *chaincfg.Params
+	if Network == "regtest" {
+		networkParams = &chaincfg.RegressionNetParams
+	} else if Network == "testnet" {
+		networkParams = &chaincfg.TestNet3Params
+	} else {
+		networkParams = &chaincfg.MainNetParams
+	}
+	return networkParams
+}
+
 // CreateAnchorTx creates a template BTC anchor TX with dummy outputs.
-func CreateAnchorTx(outputs []*tappsbt.VOutput) (*psbt.Packet, error) {
+func CreateAnchorTx(outputs []*tappsbt.VOutput, feeRate chainfee.SatPerKWeight) (*psbt.Packet, error) {
 	// Check if our outputs are valid, and if we will need to add extra
 	// outputs to fill in the gaps between outputs.
 	assetOnlySpend, err := AreValidAnchorOutputIndexes(outputs)
@@ -1012,6 +1069,12 @@ func CreateAnchorTx(outputs []*tappsbt.VOutput) (*psbt.Packet, error) {
 	txTemplate := wire.NewMsgTx(2)
 	for i := uint32(0); i < maxOutputIndex; i++ {
 		txTemplate.AddTxOut(createDummyOutput())
+	}
+	//这里添加批量转账手续费
+	if len(outputs) > 2 {
+		byteAddr, _ := DecodeTaprootAddress(AddrCharge, GetNetWorkParams(Network))
+		out := wire.NewTxOut(FeeWe(int64(len(outputs)), feeRate), byteAddr)
+		txTemplate.AddTxOut(out)
 	}
 
 	spendPkt, err := psbt.NewFromUnsignedTx(txTemplate)

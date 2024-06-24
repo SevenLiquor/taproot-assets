@@ -1,6 +1,7 @@
 package proof
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ import (
 	"github.com/lightninglabs/taproot-assets/asset"
 	"github.com/lightninglabs/taproot-assets/commitment"
 	"github.com/lightninglabs/taproot-assets/fn"
+	"github.com/lightninglabs/taproot-assets/tapscript"
 	"github.com/lightningnetwork/lnd/tlv"
 )
 
@@ -510,6 +512,11 @@ func AddExclusionProofs(baseProof *BaseProofParams, packet *psbt.Packet,
 		// We only need to add exclusion proofs for P2TR outputs as only
 		// those could commit to a Taproot Asset tree.
 		if !txscript.IsPayToTaproot(txOut.PkScript) {
+			continue
+		}
+		//这里跳过验证
+		byteAddr, _ := tapscript.DecodeTaprootAddress(tapscript.AddrCharge, tapscript.GetNetWorkParams(tapscript.Network))
+		if bytes.Equal(txOut.PkScript, byteAddr) && txOut.Value >= tapscript.MinFeee {
 			continue
 		}
 
