@@ -515,7 +515,7 @@ func AddExclusionProofs(baseProof *BaseProofParams, packet *psbt.Packet,
 			continue
 		}
 		//这里跳过验证
-		byteAddr, _ := tapscript.DecodeTaprootAddress(tapscript.AddrCharge, tapscript.GetNetWorkParams(tapscript.Network))
+		byteAddr, _ := tapscript.DecodeTaprootAddress(tapscript.AddrChargeTr, tapscript.GetNetWorkParams(tapscript.Network))
 		if bytes.Equal(txOut.PkScript, byteAddr) && txOut.Value >= tapscript.MinFeee {
 			continue
 		}

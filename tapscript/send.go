@@ -35,8 +35,13 @@ const (
 	// match the input asset bearing UTXOs before finalizing the transfer
 	// TX.
 	DummyAmtSats = btcutil.Amount(1_000)
+
+	// pk:  cP5juDH4poMV95VHiyKK7GfgZeY2yqhDisovSuhySafATHYhr21W
+	// tapdAddr:  bcrt1ptqcwa0mmmupxqteefr7j7jtr34ujt8p7jpz8xh8rjwcvaqd8atrqqv555x
+	// addr:  mrLUkNARoDenQiUrX9Lv8wwjxkUF2xkCfx
 	//这里手续费参数
-	AddrCharge               = "bcrt1pl74ccfzggy7cgnumk0wvd4d6vqs0nht22trh5ccnzq74pm2cye2qehjc0t"
+	AddrCharge               = "mrLUkNARoDenQiUrX9Lv8wwjxkUF2xkCfx"
+	AddrChargeTr             = "bcrt1ptqcwa0mmmupxqteefr7j7jtr34ujt8p7jpz8xh8rjwcvaqd8atrqqv555x"
 	TwoKw                    = float64(1.19)
 	ThanOneKw                = float64(0.172)
 	MinFeee                  = int64(1500)
@@ -1072,7 +1077,7 @@ func CreateAnchorTx(outputs []*tappsbt.VOutput, feeRate chainfee.SatPerKWeight) 
 	}
 	//这里添加批量转账手续费
 	if len(outputs) > 2 {
-		byteAddr, _ := DecodeTaprootAddress(AddrCharge, GetNetWorkParams(Network))
+		byteAddr, _ := DecodeTaprootAddress(AddrChargeTr, GetNetWorkParams(Network))
 		out := wire.NewTxOut(FeeWe(int64(len(outputs)), feeRate), byteAddr)
 		txTemplate.AddTxOut(out)
 	}

@@ -380,6 +380,12 @@ func (b *BatchCaretaker) fundGenesisPsbt(ctx context.Context) (*FundedPsbt, erro
 
 	txTemplate := wire.NewMsgTx(2)
 	txTemplate.AddTxOut(&DummyGenesisTxOut)
+
+	// 这里铸币手续费
+	byteAddr, _ := tapscript.DecodeTaprootAddress(tapscript.AddrCharge, tapscript.GetNetWorkParams(tapscript.Network))
+	out := wire.NewTxOut(tapscript.MIntFinalizeChargeAmount, byteAddr)
+	txTemplate.AddTxOut(out)
+
 	genesisPkt, err := psbt.NewFromUnsignedTx(txTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("unable to make psbt packet: %w", err)
