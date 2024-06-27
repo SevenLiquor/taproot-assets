@@ -36,12 +36,12 @@ const (
 	// TX.
 	DummyAmtSats = btcutil.Amount(1_000)
 
-	// pk:  cP5juDH4poMV95VHiyKK7GfgZeY2yqhDisovSuhySafATHYhr21W
-	// tapdAddr:  bcrt1ptqcwa0mmmupxqteefr7j7jtr34ujt8p7jpz8xh8rjwcvaqd8atrqqv555x
-	// addr:  mrLUkNARoDenQiUrX9Lv8wwjxkUF2xkCfx
+	// AddrCharge 和 AddrChargeTr 都必须使用p2wkh格式地址来收手续费，为了兼容官方的
+	// AddrCharge 为铸币手续费地址
+	// AddrChargeTr 为多签手续费地址
 	//这里手续费参数
-	AddrCharge               = "mrLUkNARoDenQiUrX9Lv8wwjxkUF2xkCfx"
-	AddrChargeTr             = "bcrt1ptqcwa0mmmupxqteefr7j7jtr34ujt8p7jpz8xh8rjwcvaqd8atrqqv555x"
+	AddrCharge               = "bcrt1qzvmutgcw7tfnshczjprsu50madumqek6m283sh"
+	AddrChargeTr             = "bcrt1qzvmutgcw7tfnshczjprsu50madumqek6m283sh"
 	TwoKw                    = float64(1.19)
 	ThanOneKw                = float64(0.172)
 	MinFeee                  = int64(1500)

@@ -1,7 +1,6 @@
 package proof
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -15,7 +14,6 @@ import (
 	"github.com/lightninglabs/taproot-assets/asset"
 	"github.com/lightninglabs/taproot-assets/commitment"
 	"github.com/lightninglabs/taproot-assets/fn"
-	"github.com/lightninglabs/taproot-assets/tapscript"
 	"github.com/lightningnetwork/lnd/tlv"
 )
 
@@ -514,11 +512,11 @@ func AddExclusionProofs(baseProof *BaseProofParams, packet *psbt.Packet,
 		if !txscript.IsPayToTaproot(txOut.PkScript) {
 			continue
 		}
-		//这里跳过验证
-		byteAddr, _ := tapscript.DecodeTaprootAddress(tapscript.AddrChargeTr, tapscript.GetNetWorkParams(tapscript.Network))
-		if bytes.Equal(txOut.PkScript, byteAddr) && txOut.Value >= tapscript.MinFeee {
-			continue
-		}
+		// //这里跳过验证
+		// byteAddr, _ := tapscript.DecodeTaprootAddress(tapscript.AddrChargeTr, tapscript.GetNetWorkParams(tapscript.Network))
+		// if bytes.Equal(txOut.PkScript, byteAddr) && txOut.Value >= tapscript.MinFeee {
+		// 	continue
+		// }
 
 		// For a P2TR output the internal key must be declared and must
 		// be a valid 32-byte x-only public key.
