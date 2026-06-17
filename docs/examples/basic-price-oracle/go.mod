@@ -4,7 +4,7 @@ go 1.25.10
 
 // We want to format raw bytes as hex instead of base64. The forked version
 // allows us to specify that as an option.
-replace google.golang.org/protobuf => github.com/lightninglabs/protobuf-go-hex-display v1.33.0-hex-display
+replace google.golang.org/protobuf => github.com/lightninglabs/protobuf-go-hex-display v1.34.2-hex-display
 
 require (
 	github.com/lightninglabs/taproot-assets v0.5.2-0.20250424095231-89a3e175feb0
